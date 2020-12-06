@@ -1,50 +1,69 @@
 ## server.R
 
-# load functions
-# source('functions/cf_algorithm.R') # content-based filtering
-# source('functions/similarity_measures.R') # similarity measures
+library(dplyr)
+library(stringr)
 
-get_user_ratings = function(value_list) {
-  dat = data.table(MovieID = sapply(strsplit(names(value_list), "_"),
-                                    function(x) ifelse(length(x) > 1, x[[2]], NA)),
-                    Rating = unlist(as.character(value_list)))
-  dat = dat[!is.null(Rating) & !is.na(MovieID)]
-  dat[Rating == " ", Rating := 0]
-  dat[, ':=' (MovieID = as.numeric(MovieID), Rating = as.numeric(Rating))]
-  dat = dat[Rating > 0]
-}
+## NOTE:
+#
+# - To run app locally:
+#   shiny::runApp()
+#
+# - To deploy app:
+#   library(rsconnect)
+#   deployApp()
+#
+##
 
-# read in data
 myurl = "https://liangfgithub.github.io/MovieData/"
+
+ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'),
+                   sep = ':',
+                   colClasses = c('integer', 'NULL'),
+                   header = FALSE)
+colnames(ratings) = c('UserID', 'MovieID', 'Rating', 'Timestamp')
+
 movies = readLines(paste0(myurl, 'movies.dat?raw=true'))
 movies = strsplit(movies, split = "::", fixed = TRUE, useBytes = TRUE)
 movies = matrix(unlist(movies), ncol = 3, byrow = TRUE)
 movies = data.frame(movies, stringsAsFactors = FALSE)
 colnames(movies) = c('MovieID', 'Title', 'Genres')
 movies$MovieID = as.integer(movies$MovieID)
+
+# convert accented characters
 movies$Title = iconv(movies$Title, "latin1", "UTF-8")
 
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
-movies$image_url = sapply(movies$MovieID,
-                          function(x) paste0(small_image_url, x, '.jpg?raw=true'))
+movies$image_url = sapply(movies$MovieID, function(x) paste0(small_image_url, x, '.jpg?raw=true'))
+
+genre_threshold = function(genre){
+  if (genre %in% c("Comedy", "Drama", "Action", "Thriller", "Sci-Fi", "Romance", "Adventure")) {
+    return(1000)
+  } else if (genre %in% c("Crime", "Horror", "Children's", "War")) {
+    return(500)
+  } else if (genre %in% c("Animation", "Musical", "Mystery", "Fantasy", "Western", "Film-Noir", "Documentary")) {
+    return(200)
+  }
+}
+
+get_recommendations_by_genre = function(chosen_genre) {
+  recommendations = ratings %>%
+  group_by(MovieID) %>%
+  summarize(ratings_per_movie = n(),
+            ave_ratings = round(mean(Rating), dig=3)) %>%
+  inner_join(movies, by = 'MovieID') %>%
+  filter(ratings_per_movie > genre_threshold(chosen_genre)) %>%
+  filter(str_detect(Genres, chosen_genre)) %>%
+  top_n(10, ave_ratings) %>%
+  mutate(Image = paste0(small_image_url,
+                        MovieID,
+                        '.jpg?raw=true')) %>%
+  select('MovieID', 'Image', 'Title', 'ave_ratings') %>%
+  arrange(desc(ave_ratings))
+
+  return(recommendations)
+}
 
 shinyServer(function(input, output, session) {
-
-  # show the books to be rated
-  output$ratings <- renderUI({
-    num_rows <- 20
-    num_movies <- 6 # movies per row
-
-    lapply(1:num_rows, function(i) {
-      list(fluidRow(lapply(1:num_movies, function(j) {
-        list(box(width = 2,
-                 div(style = "text-align:center", img(src = movies$image_url[(i - 1) * num_movies + j], height = 150)),
-                 #div(style = "text-align:center; color: #999999; font-size: 80%", books$authors[(i - 1) * num_books + j]),
-                 div(style = "text-align:center", strong(movies$Title[(i - 1) * num_movies + j])),
-                 div(style = "text-align:center; font-size: 150%; color: #f0ad4e;", ratingInput(paste0("select_", movies$MovieID[(i - 1) * num_movies + j]), label = "", dataStop = 5)))) #00c0ef
-      })))
-    })
-  })
 
   # Calculate recommendations when the sbumbutton is clicked
   df <- eventReactive(input$btn, {
@@ -55,15 +74,21 @@ shinyServer(function(input, output, session) {
         runjs(jsCode)
 
         # get the user's rating data
-        value_list <- reactiveValuesToList(input)
-        user_ratings <- get_user_ratings(value_list)
+        # print(input$genre)
 
-        user_results = (1:10)/10
-        user_predicted_ids = 1:10
+        # ======= CODE HERE =======
+
+        recommendations = get_recommendations_by_genre(input$genre)
+
+        # print(recommendations)
+
         recom_results <- data.table(Rank = 1:10,
-                                    MovieID = movies$MovieID[user_predicted_ids],
-                                    Title = movies$Title[user_predicted_ids],
-                                    Predicted_rating =  user_results)
+                                    MovieID = recommendations$MovieID,
+                                    Title = recommendations$Title,
+                                    Image = recommendations$Image,
+                                    Avg_Rating = recommendations$ave_ratings)
+
+        #  ========================
 
     }) # still busy
 
@@ -74,17 +99,24 @@ shinyServer(function(input, output, session) {
   output$results <- renderUI({
     num_rows <- 2
     num_movies <- 5
-    recom_result <- df()
+    recom_results <- df()
+    # print(recom_results)
 
     lapply(1:num_rows, function(i) {
       list(fluidRow(lapply(1:num_movies, function(j) {
-        box(width = 2, status = "success", solidHeader = TRUE, title = paste0("Rank ", (i - 1) * num_movies + j),
+        idx = (i-1) * num_movies + j
+        movie = recom_results[idx,]
+
+        box(width = 2, status = "success", solidHeader = TRUE, title = paste0("Rank ", movie$Rank),
 
           div(style = "text-align:center",
-              a(img(src = movies$image_url[recom_result$MovieID[(i - 1) * num_movies + j]], height = 150))
+              a(img(src = movie$Image, height = 150))
              ),
           div(style="text-align:center; font-size: 100%",
-              strong(movies$Title[recom_result$MovieID[(i - 1) * num_movies + j]])
+              strong(movie$Title)
+             ),
+          div(style="text-align:center; font-size: 100%",
+              strong(paste0("Rating: ", movie$Avg_Rating))
              )
 
         )
