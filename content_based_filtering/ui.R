@@ -23,6 +23,12 @@ shinyUI(
 
           dashboardBody(includeCSS("css/movies.css"),
               fluidRow(
+                  box(width = 12, title = "Select a System", status = "info", solidHeader = TRUE, collapsible = TRUE,
+                    uiOutput('urls')
+                  )
+                ),
+
+              fluidRow(
                 box(width = 12, title = "Step 1: Select a Genre", status = "info", solidHeader = TRUE, collapsible = TRUE,
                   selectInput(
                     'genre',

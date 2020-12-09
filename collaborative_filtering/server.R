@@ -82,7 +82,17 @@ ratings$Timestamp = NULL
 
 shinyServer(function(input, output, session) {
 
-  # show the books to be rated
+  output$urls <- renderUI({
+    content_based_url = a("Content-Based Filtering", href="https://grs4.shinyapps.io/content_based_filtering")
+    collaborative_url = a("Collaborative Filtering", href="https://grs4.shinyapps.io/collaborative_filtering")
+    div(
+      tagList("System I: ", content_based_url),
+      br(),
+      tagList("System II: ", collaborative_url)
+    )
+  })
+
+  # show the movies to be rated
   output$ratings <- renderUI({
     num_rows <- 20
     num_movies <- 6 # movies per row
@@ -91,7 +101,6 @@ shinyServer(function(input, output, session) {
       list(fluidRow(lapply(1:num_movies, function(j) {
         list(box(width = 2,
                  div(style = "text-align:center", img(src = movies$image_url[(i - 1) * num_movies + j], height = 150)),
-                 #div(style = "text-align:center; color: #999999; font-size: 80%", books$authors[(i - 1) * num_books + j]),
                  div(style = "text-align:center", strong(movies$Title[(i - 1) * num_movies + j])),
                  div(style = "text-align:center; font-size: 150%; color: #f0ad4e;", ratingInput(paste0("select_", movies$MovieID[(i - 1) * num_movies + j]), label = "", dataStop = 5)))) #00c0ef
       })))
@@ -127,7 +136,6 @@ shinyServer(function(input, output, session) {
     }) # still busy
 
   }) # clicked on button
-
 
   # display the recommendations
   output$results <- renderUI({

@@ -94,6 +94,15 @@ shinyServer(function(input, output, session) {
 
   }) # clicked on button
 
+  output$urls <- renderUI({
+    content_based_url = a("Content-Based Filtering", href="https://grs4.shinyapps.io/content_based_filtering")
+    collaborative_url = a("Collaborative Filtering", href="https://grs4.shinyapps.io/collaborative_filtering")
+    div(
+      tagList("System I: ", content_based_url),
+      br(),
+      tagList("System II: ", collaborative_url)
+    )
+  })
 
   # display the recommendations
   output$results <- renderUI({
