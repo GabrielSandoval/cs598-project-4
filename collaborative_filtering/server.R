@@ -21,6 +21,7 @@ createRatingMatrix = function(ratings){
 }
 
 get_recommendations = function(value_list) {
+  ratings = ratings[1:1000209,]
   selected_movies = value_list[grep(pattern = "select_", names(value_list))]
   movie_ids = as.integer(stringr::str_extract(names(selected_movies), "\\d+"))
 
