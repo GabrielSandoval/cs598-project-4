@@ -5,6 +5,6 @@ account: grs4
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3336518
-bundleId: 3931493
+bundleId: 3967016
 url: https://grs4.shinyapps.io/collaborative_filtering/
-when: 1606891968.50026
+when: 1607540248.88249

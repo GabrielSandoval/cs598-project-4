@@ -1,17 +1,61 @@
 ## server.R
 
+library(dplyr)
+library(stringr)
+
 # load functions
 # source('functions/cf_algorithm.R') # collaborative filtering
 # source('functions/similarity_measures.R') # similarity measures
 
-get_user_ratings = function(value_list) {
-  dat = data.table(MovieID = sapply(strsplit(names(value_list), "_"),
-                                    function(x) ifelse(length(x) > 1, x[[2]], NA)),
-                    Rating = unlist(as.character(value_list)))
-  dat = dat[!is.null(Rating) & !is.na(MovieID)]
-  dat[Rating == " ", Rating := 0]
-  dat[, ':=' (MovieID = as.numeric(MovieID), Rating = as.numeric(Rating))]
-  dat = dat[Rating > 0]
+createRatingMatrix = function(ratings){
+  # First create a utility matrix stored as a sparse matrix.
+  i = paste0('u', ratings$UserID)
+  j = paste0('m', ratings$MovieID)
+  x = ratings$Rating
+  tmp = data.frame(i, j, x, stringsAsFactors = T)
+  Rmat = sparseMatrix(as.integer(tmp$i), as.integer(tmp$j), x = tmp$x)
+  rownames(Rmat) = levels(tmp$i)
+  colnames(Rmat) = levels(tmp$j)
+  Rmat = new('realRatingMatrix', data = Rmat)
+  return(Rmat)
+}
+
+get_recommendations = function(value_list) {
+  selected_movies = value_list[grep(pattern = "select_", names(value_list))]
+  movie_ids = as.integer(stringr::str_extract(names(selected_movies), "\\d+"))
+
+  i = 1
+  for(movie in 1:length(selected_movies)) {
+    rating = selected_movies[i]
+    movie_id = movie_ids[i]
+    i = i + 1
+
+    if(is.na(rating) || rating == "") {
+      next
+    }
+
+    movie_id = as.integer(movie_id)
+    rating = as.integer(rating)
+
+    print(paste0("MOVIE_ID: ",  movie_id, "; RATING: ", rating))
+    ratings[dim(ratings)[1]+1,] = c(99999, movie_id, rating)
+  }
+
+  Rmat = createRatingMatrix(ratings)
+  rec = Recommender(Rmat, method = "UBCF",
+                    parameter = list(normalize = 'Z-score',
+                                     method = 'Cosine',
+                                     nn = 25))
+  recom = predict(rec, Rmat['u99999'], type = 'ratings')
+  recom = as(recom, 'matrix')[1, ]
+  ordered_recom = recom[order(recom, decreasing=TRUE)]
+  recommendations = names(ordered_recom)[1:10]
+  print(recommendations)
+  recommendations = lapply(recommendations, function(x) {
+                      as.integer(str_remove(x, "m"))
+                    })
+
+  return(recommendations)
 }
 
 # read in data
@@ -27,6 +71,14 @@ movies$Title = iconv(movies$Title, "latin1", "UTF-8")
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
 movies$image_url = sapply(movies$MovieID,
                           function(x) paste0(small_image_url, x, '.jpg?raw=true'))
+
+myurl = "https://liangfgithub.github.io/MovieData/"
+ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'),
+                   sep = ':',
+                   colClasses = c('integer', 'NULL'),
+                   header = FALSE)
+colnames(ratings) = c('UserID', 'MovieID', 'Rating', 'Timestamp')
+ratings$Timestamp = NULL
 
 shinyServer(function(input, output, session) {
 
@@ -56,14 +108,21 @@ shinyServer(function(input, output, session) {
 
         # get the user's rating data
         value_list <- reactiveValuesToList(input)
-        user_ratings <- get_user_ratings(value_list)
+        recommended_movie_ids <- get_recommendations(value_list)
 
-        user_results = (1:10)/10
-        user_predicted_ids = 1:10
+        recommendations = movies %>%
+        filter(MovieID %in% recommended_movie_ids) %>%
+        mutate(Image = paste0(small_image_url,
+                              MovieID,
+                              '.jpg?raw=true')) %>%
+        arrange(factor(MovieID, levels = recommended_movie_ids)) %>%
+        select('MovieID', 'Image', 'Title')
+
+        print(recommendations)
         recom_results <- data.table(Rank = 1:10,
-                                    MovieID = movies$MovieID[user_predicted_ids],
-                                    Title = movies$Title[user_predicted_ids],
-                                    Predicted_rating =  user_results)
+                                    MovieID = recommendations$MovieID,
+                                    Image = recommendations$Image,
+                                    Title = recommendations$Title)
 
     }) # still busy
 
@@ -74,19 +133,20 @@ shinyServer(function(input, output, session) {
   output$results <- renderUI({
     num_rows <- 2
     num_movies <- 5
-    recom_result <- df()
+    recom_results <- df()
 
     lapply(1:num_rows, function(i) {
-      list(fluidRow(lapply(1:num_movies, function(j) {
-        box(width = 2, status = "success", solidHeader = TRUE, title = paste0("Rank ", (i - 1) * num_movies + j),
+       list(fluidRow(lapply(1:num_movies, function(j) {
+        idx = (i-1) * num_movies + j
+        movie = recom_results[idx,]
 
+        box(width = 2, status = "success", solidHeader = TRUE, title = paste0("Rank ", movie$Rank),
           div(style = "text-align:center",
-              a(img(src = movies$image_url[recom_result$MovieID[(i - 1) * num_movies + j]], height = 150))
-             ),
+            a(img(src = movie$Image, height = 150))
+          ),
           div(style="text-align:center; font-size: 100%",
-              strong(movies$Title[recom_result$MovieID[(i - 1) * num_movies + j]])
-             )
-
+            strong(movie$Title)
+          )
         )
       }))) # columns
     }) # rows
