@@ -32,8 +32,19 @@ movies$MovieID = as.integer(movies$MovieID)
 # convert accented characters
 movies$Title = iconv(movies$Title, "latin1", "UTF-8")
 
+# extract Year
+movies$Year = as.numeric(unlist(
+  lapply(movies$Title, function(x) substr(x, nchar(x)-4, nchar(x)-1))))
+
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
 movies$image_url = sapply(movies$MovieID, function(x) paste0(small_image_url, x, '.jpg?raw=true'))
+
+recency_function = function(year) {
+  minYear = min(movies$Year)
+  maxYear = max(movies$Year)
+
+  return(1 + (year - minYear) / (maxYear - minYear))
+}
 
 genre_threshold = function(genre){
   if (genre %in% c("Comedy", "Drama", "Action", "Thriller", "Sci-Fi", "Romance", "Adventure")) {
@@ -49,16 +60,17 @@ get_recommendations_by_genre = function(chosen_genre) {
   recommendations = ratings %>%
   group_by(MovieID) %>%
   summarize(ratings_per_movie = n(),
-            ave_ratings = round(mean(Rating), dig=3)) %>%
+            Score = round(mean(Rating), dig=3)) %>%
   inner_join(movies, by = 'MovieID') %>%
   filter(ratings_per_movie > genre_threshold(chosen_genre)) %>%
   filter(str_detect(Genres, chosen_genre)) %>%
-  top_n(10, ave_ratings) %>%
+  top_n(10, Score) %>%
   mutate(Image = paste0(small_image_url,
                         MovieID,
                         '.jpg?raw=true')) %>%
-  select('MovieID', 'Image', 'Title', 'ave_ratings') %>%
-  arrange(desc(ave_ratings))
+  mutate(Score = round(Score * recency_function(Year), dig=3)) %>%
+  select('MovieID', 'Image', 'Title', 'Score') %>%
+  arrange(desc(Score))
 
   return(recommendations)
 }
@@ -86,7 +98,7 @@ shinyServer(function(input, output, session) {
                                     MovieID = recommendations$MovieID,
                                     Title = recommendations$Title,
                                     Image = recommendations$Image,
-                                    Avg_Rating = recommendations$ave_ratings)
+                                    Score = recommendations$Score)
 
         #  ========================
 
@@ -125,7 +137,7 @@ shinyServer(function(input, output, session) {
               strong(movie$Title)
              ),
           div(style="text-align:center; font-size: 100%",
-              strong(paste0("Rating: ", movie$Avg_Rating))
+              strong(paste0("Score: ", movie$Score))
              )
 
         )
