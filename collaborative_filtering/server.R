@@ -3,9 +3,16 @@
 library(dplyr)
 library(stringr)
 
-# load functions
-# source('functions/cf_algorithm.R') # collaborative filtering
-# source('functions/similarity_measures.R') # similarity measures
+## NOTE:
+#
+# - To run app locally:
+#   shiny::runApp()
+#
+# - To deploy app:
+#   library(rsconnect)
+#   deployApp()
+#
+##
 
 createRatingMatrix = function(ratings){
   # First create a utility matrix stored as a sparse matrix.
@@ -89,7 +96,9 @@ shinyServer(function(input, output, session) {
     div(
       tagList("System I: ", content_based_url),
       br(),
-      tagList("System II: ", collaborative_url)
+      tagList("System II: ", collaborative_url),
+      br(),
+      tags$h5("NOTE: If app crashes, please refresh the page and try again. The reason behind is most likely the [Out of Memory] issue. Shinyapps Free tier only offer 1GB of memory.", style="color: red;")
     )
   })
 
