@@ -16,7 +16,8 @@ Contributions:
 ## Demo and Code
 
 * `Demo` [[Shinyapp_link](https://grs4.shinyapps.io/content_based_filtering)]
-* `Code` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering)]
+* `System Code` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering)]
+* `HTML Markdown File (Rmd)` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering/docs/System-I.Rmd)]
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo=TRUE)
@@ -49,8 +50,7 @@ Download the MovieLens 1M Dataset. There are four files:
 
 ### Ratings data
 
-Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp
-
+  Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # use colClasses = 'NULL' to skip columns
 ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'), 
@@ -59,8 +59,7 @@ ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'),
                    header = FALSE)
 colnames(ratings) = c('UserID', 'MovieID', 'Rating', 'Timestamp')
 ```
-
-Below is how the Ratings data look like:
+  Below is how the Ratings data look like:
 ```{r, result='asis', echo=FALSE}
 datatable(head(ratings, 6), 
           class = "nowrap hover row-border", 
@@ -68,12 +67,11 @@ datatable(head(ratings, 6),
                          scrollX = FALSE, 
                          autoWidth = TRUE))
 ```
-This data can be interpreted as:
+  This data can be interpreted as:
 
-For the first row, User 1 rated Movie 1193 with 5 at timestamp 978300760.
-
+  For the first row, User 1 rated Movie 1193 with 5 at timestamp 978300760.
+  
 ### Movies data
-
 ```{r include=FALSE}
 movies = readLines(paste0(myurl, 'movies.dat?raw=true'))
 movies = strsplit(movies, split = "::", fixed = TRUE, useBytes = TRUE)
@@ -82,10 +80,9 @@ movies = data.frame(movies, stringsAsFactors = FALSE)
 colnames(movies) = c('MovieID', 'Title', 'Genres')
 movies$MovieID = as.integer(movies$MovieID)
 ```
+  Some movie titles are accented. On these cases, we convert the encoding to UTF-8.
 
-Some movie titles are accented. On these cases, we convert the encoding to UTF-8.
-
-Below is an example:
+  Below is an example:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # convert accented characters
 movies$Title[73]
@@ -96,14 +93,14 @@ movies$Title = iconv(movies$Title, "latin1", "UTF-8")
 movies$Title[73]
 ```
 
-After that, we extracted the year of release of the movie from the title.
+  After that, we extracted the year of release of the movie from the title.
 ```{r include=FALSE}
 # extract year
 movies$Year = as.numeric(unlist(
   lapply(movies$Title, function(x) substr(x, nchar(x)-4, nchar(x)-1))))
 ```
 
-Below is how the Movies data look like:
+  Below is how the Movies data look like:
 ```{r, result='asis', echo=FALSE}
 datatable(head(movies, 6), 
           class = "nowrap hover row-border", 
@@ -112,29 +109,26 @@ datatable(head(movies, 6),
                          autoWidth = TRUE))
 ```
 
-This data can be interpreted as:
+  This data can be interpreted as:
 
-For the first row, Movie 1 which was released on 1995 has the Title "Toy Story (1995)" tagged with Genres Animation, Children's and Comedy.
+  For the first row, Movie 1 which was released on 1995 has the Title "Toy Story (1995)" tagged with Genres Animation, Children's and Comedy.
 
 ## Making Recommendations (Content-Based filtering)
 
-There are three simple ways on how we can give recommendations to a user given we know the genre he/she is interested in.
+  There are three simple ways on how we can give recommendations to a user given we know the genre he/she is interested in.
 
 ### Method 1:
 
-For a user-given genre, the simplest way we can make recommendations is by getting all the movies tagged with that genre and calculating the average rating per movie. The movie with the highest average rating is placed higher in the list while the movie with the lesser average rating is placed lower in the list. Below is the popularity metric:
+  For a user-given genre, the simplest way we can make recommendations is by getting all the movies tagged with that genre and calculating the average rating per movie. The movie with the highest average rating is placed higher in the list while the movie with the lesser average rating is placed lower in the list. Below is the popularity metric:
 
-$Popularity_m = \frac{\sum_{n=1}^{N}[R_n]}{N}$
+  $Popularity_m = \frac{\sum_{n=1}^{N}[R_n]}{N}$
 
-Where:
+  Where:
 
-$Popularity_m$ is the Popularity metric for movie $m$
-
-$N$ is the number of users
-
-$n$ is the user
-
-$R_n$ is Movie rating of user n
+  * $Popularity_m$ is the Popularity metric for movie $m$
+  * $N$ is the number of users
+  * $n$ is the user
+  * $R_n$ is Movie rating of user n
 
 #### Sample Result:
 
@@ -158,19 +152,19 @@ ratings %>%
             options = list(dom = 't',
                           scrollX = TRUE, autoWidth = TRUE))
 ```
-This however introduces a bias toward movies with few ratings. For the example above, the average rating of the movie "Follow the Bitch" is 5 but if we look at the dataset, we observe that the movie was only rated by one person.
+  This however introduces a bias toward movies with few ratings. For the example above, the average rating of the movie "Follow the Bitch" is 5 but if we look at the dataset, we observe that the movie was only rated by one person.
 
-Similar to the case of the second most-'popular' movie on this recommendation list, "Smashing Time" received a perfect average rating but only 2 users rated that movie.
+  Similar to the case of the second most-'popular' movie on this recommendation list, "Smashing Time" received a perfect average rating but only 2 users rated that movie.
 
-In order to solve this issue, we can filter out movies that have less than $N$ (threshold) number of ratings. It is also important to consider that this $N$ threshold does not apply for all genres since not all genres have the same number of user ratings.
+  In order to solve this issue, we can filter out movies that have less than $N$ (threshold) number of ratings. It is also important to consider that this $N$ threshold does not apply for all genres since not all genres have the same number of user ratings.
 
-With that in context, we explore the data further to know the distribution of ratings per genre pick a threshold based on that.
+  With that in context, we explore the data further to know the distribution of ratings per genre pick a threshold based on that.
 
 ### Method 2:
 
 #### Distribution of Ratings per Genre
 
-First create a binary indicator for the 18 genres a movie.  
+  First create a binary indicator for the 18 genres a movie.  
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
 genres = as.data.frame(movies$Genres, stringsAsFactors=FALSE)
 tmp = as.data.frame(tstrsplit(genres[,1], '[|]',
@@ -191,13 +185,13 @@ colnames(genre_matrix) = genre_list
 remove("tmp", "genres")
 ```
 
-For example, the genres for the movie "Toy Story (1995)" can be expressed as:
+  For example, the genres for the movie "Toy Story (1995)" can be expressed as:
 
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
 genre_matrix[1, ]
 ```
 
-We do this for all movies. After that, we create a histogram showing the number of ratings for the 18 genres.
+  We do this for all movies. After that, we create a histogram showing the number of ratings for the 18 genres.
 
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
 tmp = ratings %>% 
@@ -216,15 +210,13 @@ data.frame(Genres = genre_list,
 ```
 ### Threshold per Genre
 
-Now that we know the distribution, we can pick a number relative the genre's number of rating. By doing empirical tests, we found that the following threshold per genre give good results:
+  Now that we know the distribution, we can pick a number relative the genre's number of rating. By doing empirical tests, we found that the following threshold per genre give good results:
 
-$N = 1000$ for Comedy, Drama, Action, Thriller, Sci-Fi, Romance, Adventure
+  * $N = 1000$ for Comedy, Drama, Action, Thriller, Sci-Fi, Romance, Adventure
+  * $N = 50$ for Crime, Horror, Children's, War
+  * $N = 200$ for Animation, Musical, Mystery, Fantasy, Western, Film-Noir, Documentary
 
-$N = 50$ for Crime, Horror, Children's, War
-
-$N = 200$ for Animation, Musical, Mystery, Fantasy, Western, Film-Noir, Documentary
-
-Following threshold above for Comedy ($N=1000$) we get the following recommendations.
+  Following threshold above for Comedy ($N=1000$) we get the following recommendations.
 
 #### Sample Result:
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
@@ -251,7 +243,7 @@ ratings %>%
 
 ### Method 3:
 
-Since some users prefer more recent movies as recommendation, another datapoint we can consider is the release date of the movie. In addition to the average rating of the users per movie, we can add a recency function to boost our 'popular' metric. Below shows the simplest linear function we can use for boosting:
+  Since some users prefer more recent movies as recommendation, another datapoint we can consider is the release date of the movie. In addition to the average rating of the users per movie, we can add a recency function to boost our 'popular' metric. Below shows the simplest linear function we can use for boosting:
 
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
 recency_function = function(year) {
@@ -265,29 +257,24 @@ plot(recency_function(1919:2000), type='l', col='red', ylab='Boost', xlab='Movie
 title("Receny Boost function")
 axis(1, at = seq(0, 90, by = 10), labels=c(1919, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000,2010))
 ```
-$f(year) = 1 + \frac{year - 1919}{2000 - 1919}$
+  
+  $f(year) = 1 + \frac{year - 1919}{2000 - 1919}$
 
-Where: 
+  Where: 
+  * $year$ is the year the movie was released
 
-$year$ is the year the movie was released
+  The above graph shows the more recent the movie is, the greater the boost we'll introduce to the 'popular' metric.
 
-The above graph shows the more recent the movie is, the greater the boost we'll introduce to the 'popular' metric.
+  Our new 'popular' metric will now be:
 
-Our new 'popular' metric will now be:
+  $Popularity_m = \frac{\sum_{n=1}^{N}[R_n]}{N}f(year_m)$
 
-$Popularity_m = \frac{\sum_{n=1}^{N}[R_n]}{N}f(year_m)$
-
-Where:
-
-$N$ is the number of users
-
-$n$ is the user
-
-$R_n$ is Movie rating of user $n$
-
-$year_m$ is the year movie $m$ was released
-
-$f(year_m)$ is the recency boost function
+  Where:
+  * $N$ is the number of users
+  * $n$ is the user
+  * $R_n$ is Movie rating of user $n$
+  * $year_m$ is the year movie $m$ was released
+  * $f(year_m)$ is the recency boost function
 
 #### Sample Result:
 ```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
@@ -314,6 +301,6 @@ ratings %>%
 
 ```
 
-Compared to the results in Method 2, we can observe that the more recent movies are higher up the list.
+  Compared to the results in Method 2, we can observe that the more recent movies are higher up the list.
 
-Depending on the data, we can change the boost function.
+  Depending on the data, we can change the boost function.
