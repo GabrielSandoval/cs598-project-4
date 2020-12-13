@@ -1,5 +1,5 @@
 ---
-title: "Project 4 - System I"
+title: "Project 4 - System I & II"
 ---
 
 ## Submission Info
@@ -13,11 +13,15 @@ Contributions:
 
 - Both team members worked on different parts of the code and concluded it together.
 
+# System I: Content-Based Filtering
+
+---
+
 ## Demo and Code
 
 * `Demo` [[Shinyapp_link](https://grs4.shinyapps.io/content_based_filtering)]
 * `System Code` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering)]
-* `HTML Markdown File (Rmd)` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering/docs/System-I.Rmd)]
+* `HTML Markdown File (Rmd)` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.Rmd)]
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo=TRUE)
@@ -304,3 +308,7 @@ ratings %>%
   Compared to the results in Method 2, we can observe that the more recent movies are higher up the list.
 
   Depending on the data, we can change the boost function.
+
+# System II: Collaborative Filtering
+
+---

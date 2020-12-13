@@ -11,7 +11,7 @@
 
 
 
-<title>Project 4 - System I</title>
+<title>Project 4 - System I &amp; II</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -2930,7 +2930,7 @@ summary {
 
 
 
-<h1 class="title toc-ignore">Project 4 - System I</h1>
+<h1 class="title toc-ignore">Project 4 - System I &amp; II</h1>
 
 </div>
 
@@ -2947,12 +2947,15 @@ summary {
 <li>Both team members worked on different parts of the code and concluded it together.</li>
 </ul>
 </div>
+<div id="system-i-content-based-filtering" class="section level1">
+<h1>System I: Content-Based Filtering</h1>
+<hr />
 <div id="demo-and-code" class="section level2">
 <h2>Demo and Code</h2>
 <ul>
 <li><code>Demo</code> [<a href="https://grs4.shinyapps.io/content_based_filtering">Shinyapp_link</a>]</li>
 <li><code>System Code</code> [<a href="https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering">Github_link</a>]</li>
-<li><code>HTML Markdown File (Rmd)</code> [<a href="https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering/docs/System-I.Rmd">Github_link</a>]</li>
+<li><code>HTML Markdown File (Rmd)</code> [<a href="https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.Rmd">Github_link</a>]</li>
 </ul>
 </div>
 <div id="download-data" class="section level2">
@@ -2970,8 +2973,8 @@ summary {
 <div id="ratings-data" class="section level3">
 <h3>Ratings data</h3>
 <p>Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp</p>
-<p>Below is how the Ratings data look like: <div id="htmlwidget-93a84af596d71e102386" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-93a84af596d71e102386">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[1,1,1,1,1,1],[1193,661,914,3408,2355,1197],[5,3,3,4,5,3],[978300760,978302109,978301968,978300275,978824291,978302268]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>UserID<\/th>\n      <th>MovieID<\/th>\n      <th>Rating<\/th>\n      <th>Timestamp<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":false,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script> This data can be interpreted as:</p>
+<p>Below is how the Ratings data look like: <div id="htmlwidget-103b52b045b3313484b2" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-103b52b045b3313484b2">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[1,1,1,1,1,1],[1193,661,914,3408,2355,1197],[5,3,3,4,5,3],[978300760,978302109,978301968,978300275,978824291,978302268]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>UserID<\/th>\n      <th>MovieID<\/th>\n      <th>Rating<\/th>\n      <th>Timestamp<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":false,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script> This data can be interpreted as:</p>
 <p>For the first row, User 1 rated Movie 1193 with 5 at timestamp 978300760.</p>
 </div>
 <div id="movies-data" class="section level3">
@@ -2981,8 +2984,8 @@ summary {
 <pre><code>## [1] &quot;Mis\xe9rables, Les (1995)&quot;</code></pre>
 <pre><code>## [1] &quot;Misérables, Les (1995)&quot;</code></pre>
 <p>After that, we extracted the year of release of the movie from the title.</p>
-<p>Below is how the Movies data look like: <div id="htmlwidget-07c634c5fb053be353af" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-07c634c5fb053be353af">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[1,2,3,4,5,6],["Toy Story (1995)","Jumanji (1995)","Grumpier Old Men (1995)","Waiting to Exhale (1995)","Father of the Bride Part II (1995)","Heat (1995)"],["Animation|Children's|Comedy","Adventure|Children's|Fantasy","Comedy|Romance","Comedy|Drama","Comedy","Action|Crime|Thriller"],[1995,1995,1995,1995,1995,1995]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>MovieID<\/th>\n      <th>Title<\/th>\n      <th>Genres<\/th>\n      <th>Year<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":false,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":[1,4]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script></p>
+<p>Below is how the Movies data look like: <div id="htmlwidget-c0a07a7c6a9c3f3d9c33" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c0a07a7c6a9c3f3d9c33">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[1,2,3,4,5,6],["Toy Story (1995)","Jumanji (1995)","Grumpier Old Men (1995)","Waiting to Exhale (1995)","Father of the Bride Part II (1995)","Heat (1995)"],["Animation|Children's|Comedy","Adventure|Children's|Fantasy","Comedy|Romance","Comedy|Drama","Comedy","Action|Crime|Thriller"],[1995,1995,1995,1995,1995,1995]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>MovieID<\/th>\n      <th>Title<\/th>\n      <th>Genres<\/th>\n      <th>Year<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":false,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":[1,4]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script></p>
 <p>This data can be interpreted as:</p>
 <p>For the first row, Movie 1 which was released on 1995 has the Title “Toy Story (1995)” tagged with Genres Animation, Children’s and Comedy.</p>
 </div>
@@ -3003,8 +3006,8 @@ summary {
 </ul>
 <div id="sample-result" class="section level4">
 <h4>Sample Result:</h4>
-<p><div id="htmlwidget-37ae08fa92fc8c6d0a09" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-37ae08fa92fc8c6d0a09">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/1830.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3233.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3607.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/745.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1148.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3030.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3307.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3022.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1223.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3429.jpg?raw=true\"><\/img>"],["Follow the Bitch (1998)","Smashing Time (1967)","One Little Indian (1973)","Close Shave, A (1995)","Wrong Trousers, The (1993)","Yojimbo (1961)","City Lights (1931)","General, The (1927)","Grand Day Out, A (1992)","Creature Comforts (1990)"],[5,5,5,4.521,4.508,4.405,4.387,4.369,4.362,4.336]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>ave_ratings<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script> This however introduces a bias toward movies with few ratings. For the example above, the average rating of the movie “Follow the Bitch” is 5 but if we look at the dataset, we observe that the movie was only rated by one person.</p>
+<p><div id="htmlwidget-4084a22868715a96ad33" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4084a22868715a96ad33">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/1830.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3233.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3607.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/745.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1148.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3030.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3307.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3022.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1223.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3429.jpg?raw=true\"><\/img>"],["Follow the Bitch (1998)","Smashing Time (1967)","One Little Indian (1973)","Close Shave, A (1995)","Wrong Trousers, The (1993)","Yojimbo (1961)","City Lights (1931)","General, The (1927)","Grand Day Out, A (1992)","Creature Comforts (1990)"],[5,5,5,4.521,4.508,4.405,4.387,4.369,4.362,4.336]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>ave_ratings<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script> This however introduces a bias toward movies with few ratings. For the example above, the average rating of the movie “Follow the Bitch” is 5 but if we look at the dataset, we observe that the movie was only rated by one person.</p>
 <p>Similar to the case of the second most-‘popular’ movie on this recommendation list, “Smashing Time” received a perfect average rating but only 2 users rated that movie.</p>
 <p>In order to solve this issue, we can filter out movies that have less than <span class="math inline">\(N\)</span> (threshold) number of ratings. It is also important to consider that this <span class="math inline">\(N\)</span> threshold does not apply for all genres since not all genres have the same number of user ratings.</p>
 <p>With that in context, we explore the data further to know the distribution of ratings per genre pick a threshold based on that.</p>
@@ -3034,8 +3037,8 @@ summary {
 </div>
 <div id="sample-result-1" class="section level4">
 <h4>Sample Result:</h4>
-<div id="htmlwidget-9efb28f08ccbdb11ea1f" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9efb28f08ccbdb11ea1f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/1136.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2324.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1234.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2858.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1197.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1278.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2804.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3114.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1304.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1288.jpg?raw=true\"><\/img>"],["Monty Python and the Holy Grail (1974)","Life Is Beautiful (La Vita è bella) (1997)","Sting, The (1973)","American Beauty (1999)","Princess Bride, The (1987)","Young Frankenstein (1974)","Christmas Story, A (1983)","Toy Story 2 (1999)","Butch Cassidy and the Sundance Kid (1969)","This Is Spinal Tap (1984)"],[4.335,4.33,4.32,4.317,4.304,4.251,4.239,4.219,4.216,4.18]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>ave_ratings<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3e2eae8916d2efd26b95" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3e2eae8916d2efd26b95">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/1136.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2324.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1234.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2858.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1197.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1278.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2804.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3114.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1304.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1288.jpg?raw=true\"><\/img>"],["Monty Python and the Holy Grail (1974)","Life Is Beautiful (La Vita è bella) (1997)","Sting, The (1973)","American Beauty (1999)","Princess Bride, The (1987)","Young Frankenstein (1974)","Christmas Story, A (1983)","Toy Story 2 (1999)","Butch Cassidy and the Sundance Kid (1969)","This Is Spinal Tap (1984)"],[4.335,4.33,4.32,4.317,4.304,4.251,4.239,4.219,4.216,4.18]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>ave_ratings<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div id="method-3" class="section level3">
@@ -3050,12 +3053,17 @@ summary {
 <p>Where: * <span class="math inline">\(N\)</span> is the number of users * <span class="math inline">\(n\)</span> is the user * <span class="math inline">\(R_n\)</span> is Movie rating of user <span class="math inline">\(n\)</span> * <span class="math inline">\(year_m\)</span> is the year movie <span class="math inline">\(m\)</span> was released * <span class="math inline">\(f(year_m)\)</span> is the recency boost function</p>
 <div id="sample-result-2" class="section level4">
 <h4>Sample Result:</h4>
-<div id="htmlwidget-5f1df636209a4b7e8d6f" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5f1df636209a4b7e8d6f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/2858.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2324.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3114.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1197.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2804.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1288.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1136.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1234.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1278.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1304.jpg?raw=true\"><\/img>"],["American Beauty (1999)","Life Is Beautiful (La Vita è bella) (1997)","Toy Story 2 (1999)","Princess Bride, The (1987)","Christmas Story, A (1983)","This Is Spinal Tap (1984)","Monty Python and the Holy Grail (1974)","Sting, The (1973)","Young Frankenstein (1974)","Butch Cassidy and the Sundance Kid (1969)"],[8.581,8.5,8.386,7.917,7.588,7.534,7.279,7.2,7.137,6.818]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>Score<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-329f6381e43e0585bedd" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-329f6381e43e0585bedd">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["<img src=\"https://liangfgithub.github.io/MovieImages/2858.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2324.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/3114.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1197.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/2804.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1288.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1136.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1234.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1278.jpg?raw=true\"><\/img>","<img src=\"https://liangfgithub.github.io/MovieImages/1304.jpg?raw=true\"><\/img>"],["American Beauty (1999)","Life Is Beautiful (La Vita è bella) (1997)","Toy Story 2 (1999)","Princess Bride, The (1987)","Christmas Story, A (1983)","This Is Spinal Tap (1984)","Monty Python and the Holy Grail (1974)","Sting, The (1973)","Young Frankenstein (1974)","Butch Cassidy and the Sundance Kid (1969)"],[8.581,8.5,8.386,7.917,7.588,7.534,7.279,7.2,7.137,6.818]],"container":"<table class=\"nowrap hover row-border\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Image<\/th>\n      <th>Title<\/th>\n      <th>Score<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","scrollX":true,"autoWidth":true,"columnDefs":[{"className":"dt-right","targets":3},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p>Compared to the results in Method 2, we can observe that the more recent movies are higher up the list.</p>
 <p>Depending on the data, we can change the boost function.</p>
 </div>
 </div>
+</div>
+</div>
+<div id="system-ii-collaborative-filtering" class="section level1">
+<h1>System II: Collaborative Filtering</h1>
+<hr />
 </div>
 
 
