@@ -23,11 +23,11 @@ Contributions:
 * `System Code` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/content_based_filtering)]
 * `HTML Markdown File (Rmd)` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.Rmd)]
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo=TRUE)
 ```
 
-```{r include=FALSE}
+```{r include=TRUE}
 library(dplyr)
 library(ggplot2)
 library(recommenderlab)
@@ -46,7 +46,7 @@ Download the MovieLens 1M Dataset. There are four files:
  * `ratings.dat` [[Github_link](https://liangfgithub.github.io/MovieData/ratings.dat?raw=true)]
  * `users.dat` [[Github_link](https://liangfgithub.github.io/MovieData/users.dat?raw=true)]
  
-```{r include=FALSE}
+```{r include=TRUE}
  myurl = "https://liangfgithub.github.io/MovieData/"
 ```
 
@@ -55,7 +55,7 @@ Download the MovieLens 1M Dataset. There are four files:
 ### Ratings data
 
   Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 # use colClasses = 'NULL' to skip columns
 ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'), 
                    sep = ':',
@@ -64,7 +64,7 @@ ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'),
 colnames(ratings) = c('UserID', 'MovieID', 'Rating', 'Timestamp')
 ```
   Below is how the Ratings data look like:
-```{r, result='asis', echo=FALSE}
+```{r, result='asis', echo=TRUE}
 datatable(head(ratings, 6), 
           class = "nowrap hover row-border", 
           options = list(dom = 't',
@@ -76,7 +76,7 @@ datatable(head(ratings, 6),
   For the first row, User 1 rated Movie 1193 with 5 at timestamp 978300760.
   
 ### Movies data
-```{r include=FALSE}
+```{r include=TRUE}
 movies = readLines(paste0(myurl, 'movies.dat?raw=true'))
 movies = strsplit(movies, split = "::", fixed = TRUE, useBytes = TRUE)
 movies = matrix(unlist(movies), ncol = 3, byrow = TRUE)
@@ -87,25 +87,25 @@ movies$MovieID = as.integer(movies$MovieID)
   Some movie titles are accented. On these cases, we convert the encoding to UTF-8.
 
   Below is an example:
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 # convert accented characters
 movies$Title[73]
 ```
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 movies$Title = iconv(movies$Title, "latin1", "UTF-8")
 movies$Title[73]
 ```
 
   After that, we extracted the year of release of the movie from the title.
-```{r include=FALSE}
+```{r include=TRUE}
 # extract year
 movies$Year = as.numeric(unlist(
   lapply(movies$Title, function(x) substr(x, nchar(x)-4, nchar(x)-1))))
 ```
 
   Below is how the Movies data look like:
-```{r, result='asis', echo=FALSE}
+```{r, result='asis', echo=TRUE}
 datatable(head(movies, 6), 
           class = "nowrap hover row-border", 
           options = list(dom = 't',
@@ -136,7 +136,7 @@ datatable(head(movies, 6),
 
 #### Sample Result:
 
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
 ratings %>% 
   group_by(MovieID) %>% 
@@ -169,7 +169,7 @@ ratings %>%
 #### Distribution of Ratings per Genre
 
   First create a binary indicator for the 18 genres a movie.  
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 genres = as.data.frame(movies$Genres, stringsAsFactors=FALSE)
 tmp = as.data.frame(tstrsplit(genres[,1], '[|]',
                               type.convert=TRUE),
@@ -191,13 +191,13 @@ remove("tmp", "genres")
 
   For example, the genres for the movie "Toy Story (1995)" can be expressed as:
 
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 genre_matrix[1, ]
 ```
 
   We do this for all movies. After that, we create a histogram showing the number of ratings for the 18 genres.
 
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 tmp = ratings %>% 
   left_join(data.frame(MovieID = movies$MovieID, genre_matrix), 
             by = "MovieID") %>%
@@ -223,7 +223,7 @@ data.frame(Genres = genre_list,
   Following threshold above for Comedy ($N=1000$) we get the following recommendations.
 
 #### Sample Result:
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
 ratings %>% 
   group_by(MovieID) %>% 
@@ -249,7 +249,7 @@ ratings %>%
 
   Since some users prefer more recent movies as recommendation, another datapoint we can consider is the release date of the movie. In addition to the average rating of the users per movie, we can add a recency function to boost our 'popular' metric. Below shows the simplest linear function we can use for boosting:
 
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 recency_function = function(year) {
   minYear = min(movies$Year)
   maxYear = max(movies$Year)
@@ -281,7 +281,7 @@ axis(1, at = seq(0, 90, by = 10), labels=c(1919, 1930, 1940, 1950, 1960, 1970, 1
   * $f(year_m)$ is the recency boost function
 
 #### Sample Result:
-```{r, result='asis', message=FALSE, warning=FALSE, echo=FALSE}
+```{r, result='asis', message=FALSE, warning=FALSE, echo=TRUE}
 small_image_url = "https://liangfgithub.github.io/MovieImages/"
 ratings %>% 
   group_by(MovieID) %>% 
@@ -341,7 +341,7 @@ Download the MovieLens 1M Dataset. There are four files:
  * `ratings.dat` [[Github_link](https://liangfgithub.github.io/MovieData/ratings.dat?raw=true)]
  * `users.dat` [[Github_link](https://liangfgithub.github.io/MovieData/users.dat?raw=true)]
  
-```{r include=FALSE}
+```{r include=TRUE}
  myurl = "https://liangfgithub.github.io/MovieData/"
 ```
 
@@ -349,7 +349,7 @@ Download the MovieLens 1M Dataset. There are four files:
 
   Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 myurl = "https://liangfgithub.github.io/MovieData/"
 
 ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'), 
@@ -361,7 +361,7 @@ ratings$Timestamp = NULL
 ```
 
   Below is how the Ratings data look like:
-```{r, result='asis', echo=FALSE}
+```{r, result='asis', echo=TRUE}
 datatable(head(ratings, 6), 
           class = "nowrap hover row-border", 
           options = list(dom = 't',
@@ -393,7 +393,7 @@ datatable(head(ratings, 6),
 
 * User $u1$ rated Movie $m2$ with $4$.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
   createRatingMatrix = function(train){
     # First create a utility matrix stored as a sparse matrix.
     i = paste0('u', train$UserID)
@@ -411,7 +411,7 @@ datatable(head(ratings, 6),
   }
 ```
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
   train.id = sample(nrow(ratings), floor(nrow(ratings)) * 0.8)
   train = ratings[train.id, ]
   test = ratings[-train.id, ]
@@ -425,7 +425,7 @@ datatable(head(ratings, 6),
 
 ### User-Based Collaborative Filtering (UBCF)
 
-##### User-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
+#### User-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
 
   "Users similar to you also liked..."
 
@@ -435,11 +435,11 @@ datatable(head(ratings, 6),
   * similarity measure - determines the distance metric between the users. For our evaluation, we will use the Cosine similarity measure.
   * normalize - determines the normalization method used to remove individual rating bias. For our evaluation, we will use the Z-score formula.
   
-##### Goal
+#### Goal
 
   Here, we try to predict the probability that User x likes a movie by referencing to $k$-other users that rated the similar movies as User x.
   
-##### Algorithm
+#### Algorithm
 
   The first step is to do normalization. This is an important step because some users are more generous when rating movies - they generally give more high ratings. For example, if they like a movie, the give a rating of 5 but if they don't they give a rating of 4. Other users, on the other hand, are more critical when it comes to rating movies. They give a rating of 5 if they liked the movie and 1 if they don't like it. Normalizing allows us to be able to compare both users on common grounds. One way we can do normalize is by using the z-score formula:
   
@@ -474,7 +474,7 @@ datatable(head(ratings, 6),
   
 ### Item-Based Collaborative Filtering (IBCF)
 
-##### Item-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
+#### Item-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
 
   "Users who liked these item also liked..."
   
@@ -484,11 +484,11 @@ datatable(head(ratings, 6),
   * similarity measure - determines the distance metric between the users. For our evaluation, we will use the Cosine similarity measure.
   * normalize - determines the normalization method used to remove individual rating bias. For our evaluation, we will use the Z-score formula.
   
-##### Goal
+#### Goal
 
   Here, we try to predict the probability that user X likes a movie by referencing to other items who have rated the same set of items as user X.
 
-##### Algorithm
+#### Algorithm
 
   With the same reason as mentioned in the User-Based Collaborative Filtering, normalization is an important step to reduce individual rating bias. The same Z-score formula is used.
   
@@ -520,7 +520,7 @@ datatable(head(ratings, 6),
 
 ## Results
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 output = foreach(iter = 1:10) %dopar% {
   print(paste0("Iteration: ", iter))
   
@@ -629,7 +629,7 @@ saveRDS(output, file = "output.rds")
   
   $RMSE = \sqrt{ \frac{\sum_{(i,j)\in K}(r_{ij} - \hat{r}_{ij})^{2}}{\left | K \right |}}$
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 IBCF_errors = c()
 UBCF_errors = c()
 IBCF_times = c()
@@ -645,7 +645,7 @@ for(iter in 1:10) {
 }
 ```
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 plot(1:10, UBCF_errors, type="b", col="blue", lwd=1, pch=15, xlab="Iteration", ylab="RMSE", ylim=range(1.4,1.6))
 lines(1:10, IBCF_errors, type="b", col="red", lwd=1, pch=19)
 title("Model Performance")
@@ -657,7 +657,7 @@ legend(4.5,1.53, c("IBCF","UBCF"), lwd=c(1,1), col=c("red","blue"), pch=c(15,19)
   
 ### Efficiency
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo=TRUE}
 plot(1:10, UBCF_times, type="b", col="blue", lwd=1, pch=15, xlab="Iteration", ylab="Minutes", ylim=range(0, 20))
 lines(1:10, IBCF_times, type="b", col="red", lwd=1, pch=19)
 title("Model Evaluation Time")
