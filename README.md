@@ -7,7 +7,9 @@ This project contains two versions of movie recommender:
 
 ## Docs
 
-HTML Markdown File: [\[code\]](https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.Rmd) [\[html\]](https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.html)
+HTML Markdown File: [\[code\]](https://github.com/GabrielSandoval/cs598-project-4/tree/master/docs/System-I-II.Rmd) [\[html\]](https://coursera-assessments.s3.amazonaws.com/assessments/1607864846277/17f91d43-1ca6-4cb0-82da-ffb1ccfaa817/System-I-II.html)
+
+If above link does not work, view here: [\[html\]](https://github.com/GabrielSandoval/cs598-project-4/blob/master/docs/System-I-II.html)
 
 ## Team
 - Gabriel Sandoval (grs4)
