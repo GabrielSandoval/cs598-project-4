@@ -309,6 +309,375 @@ ratings %>%
 
   Depending on the data, we can change the boost function.
 
+
 # System II: Collaborative Filtering
 
 ---
+
+## Demo and Code
+
+* `Demo - IBCF` [[Shinyapp_link](https://grs4.shinyapps.io/collaborative_filtering)]
+* `Code` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/collaborative_filtering)]
+* `HTML Markdown File (Rmd)` [[Github_link](https://github.com/GabrielSandoval/cs598-project-4/tree/master/collaborative_filtering/docs/System-II.Rmd)]
+
+```{r, message=FALSE}
+library(recommenderlab)
+library(Matrix)
+library(ggplot2)
+library(foreach)
+library(doParallel)
+library(DT)
+library(data.table)
+registerDoParallel(cores=5)
+```
+
+
+## Download Data
+
+Download the MovieLens 1M Dataset. There are four files: 
+
+ * `README` [[Github_link](https://liangfgithub.github.io/MovieData/README?raw=true)]
+ * `movies.dat` [[Github_link](https://liangfgithub.github.io/MovieData/movies.dat?raw=true)]
+ * `ratings.dat` [[Github_link](https://liangfgithub.github.io/MovieData/ratings.dat?raw=true)]
+ * `users.dat` [[Github_link](https://liangfgithub.github.io/MovieData/users.dat?raw=true)]
+ 
+```{r include=FALSE}
+ myurl = "https://liangfgithub.github.io/MovieData/"
+```
+
+## Read the Data (ratings.dat)
+
+  Ratings data consists of 4 columns: UserID, MovieID, Rating, Timestamp
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+myurl = "https://liangfgithub.github.io/MovieData/"
+
+ratings = read.csv(paste0(myurl, 'ratings.dat?raw=true'), 
+                   sep = ':',
+                   colClasses = c('integer', 'NULL'), 
+                   header = FALSE)
+colnames(ratings) = c('UserID', 'MovieID', 'Rating', 'Timestamp')
+ratings$Timestamp = NULL
+```
+
+  Below is how the Ratings data look like:
+```{r, result='asis', echo=FALSE}
+datatable(head(ratings, 6), 
+          class = "nowrap hover row-border", 
+          options = list(dom = 't',
+                         scrollX = FALSE, 
+                         autoWidth = TRUE))
+```
+  This data can be interpreted as:
+
+  For the first row, User 1 rated Movie 1193 with 5 at timestamp 978300760.
+
+
+## Training Test Split
+
+  Create
+
+  * **train** data that contain about 80\% rows of `ratings.dat` 
+
+  * **test** data that contain about 20\% of rows of `ratings.dat`
+
+
+## Preprocessing
+
+  * For each model, we create a sparse $R$ matrix where each element $R_{ij}$ is the rating of user $i$ for movie $j$.
+
+  ![](R_matrix.png)
+
+
+  The above can be read as:
+
+* User $u1$ rated Movie $m2$ with $4$.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+  createRatingMatrix = function(train){
+    # First create a utility matrix stored as a sparse matrix.
+    i = paste0('u', train$UserID)
+    j = paste0('m', train$MovieID)
+    x = train$Rating
+    
+    tmp = data.frame(i, j, x, stringsAsFactors = T)
+    Rmat = sparseMatrix(as.integer(tmp$i), as.integer(tmp$j), x = tmp$x)
+    
+    rownames(Rmat) = levels(tmp$i)
+    colnames(Rmat) = levels(tmp$j)
+    Rmat = new('realRatingMatrix', data = Rmat)
+    
+    return(Rmat)
+  }
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+  train.id = sample(nrow(ratings), floor(nrow(ratings)) * 0.8)
+  train = ratings[train.id, ]
+  test = ratings[-train.id, ]
+  
+  Rmat = createRatingMatrix(train)
+```
+
+## Model Evaluation: UBCF & IBCF
+
+  For this study, we'll be comparing two recommendation algorithm. For simpilicity, we're using the `recommenderlab` package in R and evaluate the two methods:
+
+### User-Based Collaborative Filtering (UBCF)
+
+##### User-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
+
+  "Users similar to you also liked..."
+
+  Parameters to this model include the following:
+  
+  * $nn$ - determines how many users will be aggregated (nearest neighbors) to make a prediction. For our evaluation, we will use $nn=25$.
+  * similarity measure - determines the distance metric between the users. For our evaluation, we will use the Cosine similarity measure.
+  * normalize - determines the normalization method used to remove individual rating bias. For our evaluation, we will use the Z-score formula.
+  
+##### Goal
+
+  Here, we try to predict the probability that User x likes a movie by referencing to $k$-other users that rated the similar movies as User x.
+  
+##### Algorithm
+
+  The first step is to do normalization. This is an important step because some users are more generous when rating movies - they generally give more high ratings. For example, if they like a movie, the give a rating of 5 but if they don't they give a rating of 4. Other users, on the other hand, are more critical when it comes to rating movies. They give a rating of 5 if they liked the movie and 1 if they don't like it. Normalizing allows us to be able to compare both users on common grounds. One way we can do normalize is by using the z-score formula:
+  
+  $h(r_{ui}) = \frac{r_{ui} - \hat{r_u}}{\sigma_{r_{u}}}$
+  
+  
+  Where:
+  * $h(r_{ui})$ - is the normalized user rating for item $i$
+  * $\frac{r_{ui}$ - is the user rating for item $i$
+  * $\hat{r_u}$ - is the average of all the ratings the user made
+  * \sigma_{r_{u}} - is the standard deviation of the ratings the user made
+  
+  After normalizing, the similarity values between User x and other users are measured by observing all the items that are rated by both of them. One of the common ways to compute this distance metric is by using cosine similarity expressed as:
+  
+  $sim_{Cosine}(\vec{x}, \vec{y}) = \frac{\vec{x}\cdot\vec{y}}{\left \| \vec{x} \right \|\left \| \vec{y} \right \|}$
+  
+  Where:
+  
+  * $\vec{x}$ represents the row vector of $users_x$ in the $R$ matrix
+  * $\vec{y}$ represents the row vector of $users_y$ in the $R$ matrix
+  
+  Take note that the dimension (items) used is only for the items rated by both users x and y.
+  
+  After getting the $k$-most similar users ($k$-nearest neighbors), we aggregate their ratings to form the prediction. The simplest way to do this is by averaging the ratings in the neighborhood.
+  
+  $\hat{r}_{aj} = \frac{1}{\left | N(a) \right |}\sum_{i\in N(a)} r_{ij}$
+  
+  Where:
+  * $\hat{r_{aj}}$ - is the predicted rating of the active user $a$ for item $j$
+  * $\left | N(a) \right |$ - is the number of nearest neighbor for active user $a$
+  * $r_{ij}$ - is the rating of nearest neighbor user $i$ for item $j$
+  
+### Item-Based Collaborative Filtering (IBCF)
+
+##### Item-Based Collaborative Filtering is a memory-based approach which tries to cater the following case:
+
+  "Users who liked these item also liked..."
+  
+  Parameters to this model include the following:
+  
+  * $k$ - determines how many users will be aggregated ($k$ nearest neighbors) to make a prediction. For our evaluation, we will use $k=25$.
+  * similarity measure - determines the distance metric between the users. For our evaluation, we will use the Cosine similarity measure.
+  * normalize - determines the normalization method used to remove individual rating bias. For our evaluation, we will use the Z-score formula.
+  
+##### Goal
+
+  Here, we try to predict the probability that user X likes a movie by referencing to other items who have rated the same set of items as user X.
+
+##### Algorithm
+
+  With the same reason as mentioned in the User-Based Collaborative Filtering, normalization is an important step to reduce individual rating bias. The same Z-score formula is used.
+  
+  $h(r_{ui}) = \frac{r_{ui} - \hat{r_u}}{\sigma_{r_{u}}}$
+  
+  Where:
+  * $h(r_{ui})$ - is the normalized user rating for item $i$
+  * $\frac{r_{ui}$ - is the user rating for item $i$
+  * $\hat{r_u}$ - is the average of all the ratings the user made
+  * \sigma_{r_{u}} - is the standard deviation of the ratings the user made
+
+  After normalizing, item-to-item similarities using a similarity measure is generated which we'll call $S$. One of the common ways to compute this distance metric is again, by using Cosine similarity.
+    
+  Space and time complexity is reduced to $n x k$ with $n < k$ ($k$ nearest neighbor). This similarity subset is expressed as $S(i)$.
+  
+  Recommendation of item $i$ for active user $a$ is made by using the similarities to calculate a weighted sum of the user's ratings for related items:
+  
+  $\hat{r}_{ai} = \frac{1}{\sum_{j\in{S(i)\cap{l;r_{al}\neq?}}}s_{ij}} \sum_{{j\in{S(i)\cap{l;r_{al}\neq?}}}}s_{ij}$
+  
+  Where:
+  * $\hat{r_{aj}}$ - is the predicted rating of the active user $a$ for item $j$
+  * $s_{ij}$ - is the weight obtained from the ${i}^{th}$ row and $j^{th}$ column of the similarity matrix $S$ that we computed.
+  * ${r_{aj}}$ - is the rating of active user $a$ for item $j$.
+  
+  
+### Handling missing values:
+
+  On test evaluation, missing values are handled by setting it as the average rating among all the items the user rated. For cases where this is not applicable, we set it to $2.5$.
+
+## Results
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+output = foreach(iter = 1:10) %dopar% {
+  print(paste0("Iteration: ", iter))
+  
+  library(recommenderlab)
+  library(Matrix)
+  
+  createRatingMatrix = function(train){
+    # First create a utility matrix stored as a sparse matrix.
+    i = paste0('u', train$UserID)
+    j = paste0('m', train$MovieID)
+    x = train$Rating
+    
+    tmp = data.frame(i, j, x, stringsAsFactors = T)
+    Rmat = sparseMatrix(as.integer(tmp$i), as.integer(tmp$j), x = tmp$x)
+    
+    rownames(Rmat) = levels(tmp$i)
+    colnames(Rmat) = levels(tmp$j)
+    Rmat = new('realRatingMatrix', data = Rmat)
+    Rmat = normalize(Rmat)
+    
+    return(Rmat)
+  }
+  
+  trainMethod = function(Rmat, rec, method = ""){
+    out = c()
+    
+    start_time = Sys.time()
+    out$recom = predict(rec, Rmat, type = 'ratings')  
+    end_time = Sys.time()
+    out$training_time = end_time - start_time
+    
+    return(out)
+  }
+  
+  testMethod = function(recom, Rmat, test){
+    rec_list = as(recom, 'list')  # each element are ratings of that user
+    
+    test.pred = test
+    test.pred$rating = NA
+    
+    # For all lines in test file, one by one
+    for (u in 1:nrow(test)){
+      # Read userid and movieid from columns 2 and 3 of test data
+      userid = as.character(paste0('u', test$UserID[u]))
+      movieid = as.character(paste0('m', test$MovieID[u]))
+      
+      rating = rec_list[[userid]][movieid]
+      
+      # handle missing values; Use the mean rating of this user.
+      user_ratings = Rmat[test$UserID[u]]
+      user_ratings = user_ratings[!is.na(user_ratings)]
+      mean_user_rating = mean(user_ratings)
+      fallback = ifelse(is.na(mean_user_rating), 2.5, mean_user_rating)
+      test.pred$rating[u] = ifelse(is.na(rating), fallback, rating)
+    }
+    
+    rmse = sqrt(mean((test$Rating - test.pred$rating)^2))
+    return(rmse)
+  }
+  
+  # Train-test split
+  train.id = sample(nrow(ratings), floor(nrow(ratings)) * 0.8)
+  train = ratings[train.id, ]
+  test = ratings[-train.id, ]
+  
+  Rmat = createRatingMatrix(train)
+  
+  # ===========================================================
+  method = "UBCF" # ===========================================
+  # ===========================================================
+  
+  rec_UBCF = Recommender(Rmat, method = method,
+                  parameter = list(normalize = 'Z-score', 
+                                   method = 'Cosine', 
+                                   nn = 25))
+  out_ubcf        = trainMethod(Rmat, rec_UBCF, method = method)
+  out_ubcf$rmse   = testMethod(out_ubcf$recom, Rmat, test)
+  out_ubcf$iter   = iter
+  out_ubcf$method = method
+  
+  # ===========================================================
+  method = "IBCF" # ===========================================
+  # ===========================================================
+  
+  rec_IBCF = Recommender(Rmat, method = method,
+                  parameter = list(normalize = 'Z-score', 
+                                   method = 'Cosine',
+                                   k = 25))
+  
+  out_ibcf        = trainMethod(Rmat, rec_IBCF, method = method)
+  out_ibcf$rmse   = testMethod(out_ibcf$recom, Rmat,test)
+  out_ibcf$iter   = iter
+  out_ibcf$method = method
+  # ===========================================================
+  
+  
+  c(out_ubcf, out_ibcf)
+}
+
+saveRDS(output, file = "output.rds")
+```
+
+### Accuracy
+
+  For accuracy, we use the popular Root Mean Square Error (RMSE).
+  
+  $RMSE = \sqrt{ \frac{\sum_{(i,j)\in K}(r_{ij} - \hat{r}_{ij})^{2}}{\left | K \right |}}$
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+IBCF_errors = c()
+UBCF_errors = c()
+IBCF_times = c()
+UBCF_times = c()
+
+for(iter in 1:10) {
+  ubcf = output[[iter]][1:6]
+  ibcf = output[[iter]][7:12]
+  IBCF_errors[iter] = ibcf$rmse
+  UBCF_errors[iter] = ubcf$rmse
+  IBCF_times[iter] = as(ibcf$training_time, 'double')
+  UBCF_times[iter] = as(ubcf$training_time, 'double')
+}
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+plot(1:10, UBCF_errors, type="b", col="blue", lwd=1, pch=15, xlab="Iteration", ylab="RMSE", ylim=range(1.4,1.6))
+lines(1:10, IBCF_errors, type="b", col="red", lwd=1, pch=19)
+title("Model Performance")
+
+legend(4.5,1.53, c("IBCF","UBCF"), lwd=c(1,1), col=c("red","blue"), pch=c(15,19), y.intersp=1.5)
+```
+
+  The above graph shows that for all 10 iterations, the User-Based collaborative Filtering performs better than the Item-Based Collaborative Filtering.
+  
+### Efficiency
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+plot(1:10, UBCF_times, type="b", col="blue", lwd=1, pch=15, xlab="Iteration", ylab="Minutes", ylim=range(0, 20))
+lines(1:10, IBCF_times, type="b", col="red", lwd=1, pch=19)
+title("Model Evaluation Time")
+
+legend(4.5,13, c("UBCF ","IBCF"), lwd=c(1,1), col=c("blue","red"), pch=c(15,19), y.intersp=1.5)
+```
+
+  Although Item-Based Collborative Filtering is slightly inferior in terms of accuracy, it is the better choice if we're aiming for efficiency. Since in Item-Based Collaborative Filtering, we reduce the similarity matrix ($N$ x $K$) as opposed to a full $N$ x $N$.
+
+## Machine Specification
+
+* CPU: Ryzen 5 3600 6-Core Processor 3.60GHz
+* RAM: 32.0 GB
+* Storage: 1TB SSD
+* OS: Windows 10 Pro
+
+* NOTE: Tests were ran in parallel by utilizing 5 CPU cores.
+
+## Sources
+
+* recommenderlab: A Framework for Developing and Testing Recommendation Algorithms
+  
+  https://cran.r-project.org/web/packages/recommenderlab/vignettes/recommenderlab.pdf
